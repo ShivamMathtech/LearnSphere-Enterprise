@@ -1,0 +1,25 @@
+{
+  "delivery": "1.0.0 source",
+  "verification_window": "2026-10-14 to 2026-10-15",
+  "python": "3.12.14",
+  "node": "24.19.0",
+  "database_runtime_verified": [
+    "SQLite"
+  ],
+  "backend_tests_passed": 18,
+  "backend_statement_coverage_percent": 80,
+  "frontend_tests_passed": 12,
+  "browser_tests_passed": 2,
+  "frontend_build": "passed",
+  "backend_lint": "passed",
+  "backend_typecheck": "passed",
+  "frontend_lint": "passed",
+  "frontend_strict_typecheck": "passed",
+  "postgresql_dialect_compile": "passed",
+  "windows_runtime_wheel_downloads": 37,
+  "native_windows_run": "not executed",
+  "docker_health": "not executed",
+  "postgresql_runtime": "not executed",
+  "postgresql_restore_drill": "not executed",
+  "production_ready": false
+}

@@ -1,0 +1,52 @@
+# Separate local PostgreSQL stack. Never use this file on an exposed production host.
+name: learnsphere-dev
+services:
+  db:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_DB: learnsphere_dev
+      POSTGRES_USER: lms_dev
+      POSTGRES_PASSWORD: local-development-only
+    volumes: [dev_postgres:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U lms_dev -d learnsphere_dev]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  backend:
+    build: ./backend
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+psycopg://lms_dev:local-development-only@db:5432/learnsphere_dev
+      DEMO_ENABLED: 'true'
+      FRONTEND_URL: http://localhost:8080
+      CORS_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+      STORAGE_PATH: /app/storage
+    volumes: [dev_files:/app/storage]
+    command: [sh, -c, 'python -m alembic upgrade head && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log']
+    depends_on:
+      db: {condition: service_healthy}
+    restart: unless-stopped
+  worker:
+    build: ./backend
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+psycopg://lms_dev:local-development-only@db:5432/learnsphere_dev
+      DEMO_ENABLED: 'true'
+    command: [python, -m, app.tasks.scheduler]
+    healthcheck: {disable: true}
+    depends_on:
+      backend: {condition: service_healthy}
+    restart: unless-stopped
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports: ['127.0.0.1:8080:8080']
+    depends_on:
+      backend: {condition: service_healthy}
+    restart: unless-stopped
+volumes:
+  dev_postgres: {}
+  dev_files: {}
